@@ -38,8 +38,8 @@ jobs:
           npx expo prebuild --platform ios --non-interactive
           cd ios
           xcodebuild \
-            -workspace YourApp.xcworkspace \
-            -scheme YourApp \
+            -workspace expo-local-builds-ci-cd.xcworkspace.xcworkspace \
+            -scheme expo-local-builds-ci-cd.xcworkspace \
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build
@@ -47,5 +47,5 @@ jobs:
       - name: Upload .app artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YourApp.app
+          name: expo-local-builds-ci-cd.xcworkspace.app
           path: ios/build/Build/Products/Release-iphonesimulator/*.app
