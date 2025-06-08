@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.uroge.expolocalbuildcicd",
       "supportsTablet": true
     },
     "android": {
@@ -16,6 +17,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "package": "com.uroge.expolocalbuildcicd",
       "edgeToEdgeEnabled": true
     },
     "web": {
