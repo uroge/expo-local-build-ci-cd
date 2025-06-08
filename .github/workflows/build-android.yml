@@ -1,4 +1,4 @@
-name: Expo local builds CI
+name: Expo local builds CI IOS
 
 on:
   push:
@@ -7,12 +7,19 @@ on:
       - develop
 
 jobs:
-  build-android:
-    name: Android Build (APK)
-    runs-on: ubuntu-latest
+  build-ios:
+    name: iOS Build (.app for simulator)
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache iOS build output
+        id: cache-ios
+        uses: actions/cache@v3
+        with:
+          path: ios/build/Build/Products/Release-iphonesimulator
+          key: ios-build-${{ github.ref }}-${{ github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -25,16 +32,20 @@ jobs:
       - name: Install Expo CLI
         run: npm install -g expo-cli
 
-      - name: Prebuild Android
-        run: npx expo prebuild --platform android --non-interactive
-
-      - name: Build Android APK
+      - name: Build iOS app
+        if: steps.cache-ios.outputs.cache-hit != 'true' || github.ref == 'refs/heads/main'
         run: |
-          cd android
-          ./gradlew assembleRelease
+          npx expo prebuild --platform ios --non-interactive
+          cd ios
+          xcodebuild \
+            -workspace YourApp.xcworkspace \
+            -scheme YourApp \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build
 
-      - name: Upload APK artifact
+      - name: Upload .app artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release.apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: YourApp.app
+          path: ios/build/Build/Products/Release-iphonesimulator/*.app

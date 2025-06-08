@@ -1,3 +1,11 @@
+name: Expo local builds CI IOS
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
 build-ios:
   name: iOS Build (.app for simulator)
   runs-on: macos-latest
