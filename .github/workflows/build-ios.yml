@@ -38,8 +38,8 @@ jobs:
           npx expo prebuild --platform ios --non-interactive
           cd ios
           xcodebuild \
-            -workspace ios/expolocaldbuildscicd.xcodeproj/project.xcworkspace \
-            -scheme expolocaldbuildscicd \
+            -workspace expolocalbuildscicd.xcworkspace \
+            -scheme expolocalbuildscicd \
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build
