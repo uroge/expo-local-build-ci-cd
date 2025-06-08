@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-android:
-    name: Android Build (Debug APK)
+    name: Android Build (APK)
     runs-on: ubuntu-latest
 
     steps:
@@ -17,45 +17,21 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.18.1
 
       - name: Install dependencies
-        uses: bahmutov/npm-install@v1 # Faster dependency install
-        with:
-          install-command: yarn install --frozen-lockfile # Ensure consistent builds
+        run: yarn install
 
-      - name: Install Expo CLI (Local)
-        run: yarn add -D expo-cli # Install locally for project isolation and version control
+      - name: Install Expo CLI
+        run: npm install -g expo-cli
 
-      - name: Configure Expo for Local Builds
-        run: |
-          yarn expo config:set "android.package" "com.uroge.expolocalbuildcicd" --type public --non-interactive # Replace with your package name
-          yarn expo config:set "updates.enabled" false --type public --non-interactive # Disable OTA updates
-
-      - name: Check if previous build exists on develop
-        id: check_previous_build
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          # Check if a previous build completed successfully for this commit
-          PREVIOUS_BUILD=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/check-runs" | jq -r '.check_runs[] | select(.name=="Android Build (Debug APK)" and .conclusion=="success") | .id')
-          if [[ -n "$PREVIOUS_BUILD" ]]; then
-            echo "::set-output name=skip_build::true"
-          else
-            echo "::set-output name=skip_build::false"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Android APK (Debug)
-        if: github.ref == 'refs/heads/main' || steps.check_previous_build.outputs.skip_build == 'false'
-        run: |
-          yarn expo prebuild --platform android --non-interactive --no-install
+      - name: Build Android APK
+        run: npx expo prebuild --platform android --non-interactive
           cd android
-          ./gradlew assembleDebug # Build an unsigned debug APK
+          ./gradlew assembleRelease
 
       - name: Upload APK artifact
-        if: github.ref == 'refs/heads/main' || steps.check_previous_build.outputs.skip_build == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
