@@ -1,4 +1,4 @@
-name: Expo Local Builds CI - iOS
+name: Expo local builds CI iOS
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
 
 jobs:
   build-ios:
-    name: iOS Build (.app for Simulator)
-    runs-on: macos-latest
+    name: iOS Build (Simulator .app)
+    runs-on: macos-13 # GitHub-hosted macOS runner (macos-latest also works)
 
     steps:
       - uses: actions/checkout@v4
@@ -24,51 +24,26 @@ jobs:
         with:
           install-command: yarn install --frozen-lockfile
 
-      - name: Install Expo CLI (Local)
+      - name: Install Expo CLI
         run: yarn add -D expo-cli
 
-      - name: Configure Expo scheme
+      - name: Prebuild native iOS project
         run: |
-          yarn expo config:set "scheme" "expolocalbuildscicd" --type public --non-interactive
+          rm -rf ios android
+          npx expo prebuild --platform ios --non-interactive --no-install
 
-      - name: Clean existing native folders
-        run: rm -rf ios android
-
-      - name: Run Expo prebuild for iOS (Objective-C)
-        run: yarn expo prebuild --platform ios --non-interactive --no-install
-
-      - name: Check for previous successful build on develop
-        id: check_previous_build
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          PREVIOUS_BUILD=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/check-runs" | jq -r '.check_runs[] | select(.name=="iOS Build (.app for Simulator)" and .conclusion=="success") | .id')
-          if [[ -n "$PREVIOUS_BUILD" ]]; then
-            echo "Previous build found — skipping"
-            echo "::set-output name=skip_build::true"
-          else
-            echo "::set-output name=skip_build::false"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build iOS app (.app for Simulator)
-        if: github.ref == 'refs/heads/main' || steps.check_previous_build.outputs.skip_build == 'false'
-        env:
-          BUNDLE_IDENTIFIER: com.uroge.expolocalbuildcicd
+      - name: Build iOS .app (Simulator)
         run: |
           cd ios
           xcodebuild \
-            -workspace expolocalbuildscicd.xcworkspace \
-            -scheme expolocalbuildscicd \
-            -configuration Release \
+            -workspace expo-local-build-ci-cd.xcworkspace \
+            -scheme expo-local-build-ci-cd \
+            -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -derivedDataPath build \
-            PRODUCT_BUNDLE_IDENTIFIER=$(echo "$BUNDLE_IDENTIFIER")
+            -derivedDataPath build
 
-      - name: Upload built .app artifact
-        if: github.ref == 'refs/heads/main' || steps.check_previous_build.outputs.skip_build == 'false'
+      - name: Upload iOS .app as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: expo-local-builds-ci-cd-simulator.app
-          path: ios/build/Build/Products/Release-iphonesimulator/expolocalbuildscicd.app
+          name: app-ios-debug
+          path: ios/build/Build/Products/Debug-iphonesimulator/*.app
