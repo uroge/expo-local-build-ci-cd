@@ -9,7 +9,7 @@ on:
 jobs:
   build-ios:
     name: iOS Build (Simulator .app)
-    runs-on: macos-13 # GitHub-hosted macOS runner (macos-latest also works)
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -28,19 +28,29 @@ jobs:
         run: yarn add -D expo-cli
 
       - name: Prebuild native iOS project
-        run: |
-          rm -rf ios android
-          npx expo prebuild --platform ios --non-interactive --no-install
-
-      - name: Build iOS .app (Simulator)
+        run: npx expo prebuild --platform ios --no-install
+      - name: Install CocoaPods
         run: |
           cd ios
-          xcodebuild \
-            -workspace expo-local-build-ci-cd.xcworkspace \
-            -scheme expo-local-build-ci-cd \
-            -configuration Debug \
+          pod install
+          cd ..
+
+      # - name: Build iOS .app (Simulator)
+      #   run: |
+      #     cd ios
+      #     xcodebuild \
+      #       -workspace expo-local-build-ci-cd.xcworkspace \
+      #       -scheme expo-local-build-ci-cd \
+      #       -configuration Debug \
+      #       -sdk iphonesimulator \
+      #       -derivedDataPath build
+      - name: Build iOS .app (Simulator)
+        run: |
+          xcodebuild -workspace ios/expolocalbuildcicd.xcworkspace \
+            -scheme expolocalbuildcicd \
             -sdk iphonesimulator \
-            -derivedDataPath build
+            -configuration Debug \
+            -derivedDataPath ios/build
 
       - name: Upload iOS .app as artifact
         uses: actions/upload-artifact@v4
