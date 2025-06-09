@@ -8,7 +8,9 @@ platform :ios do
       scheme: "expolocalbuildscicd",
       sdk: "iphonesimulator",
       configuration: "Debug",
-      derived_data_path: "ios/build"
+      export_method: "development",
+      codesigning_identity: "",
+      skip_codesigning: true
     )
   end
 end
