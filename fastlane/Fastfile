@@ -3,14 +3,16 @@ default_platform(:ios)
 platform :ios do
   desc "Build iOS app for Simulator"
   lane :build_simulator do
-    build_app(
-      workspace: "ios/expolocalbuildscicd.xcworkspace",
+    gym(
+      workspace: "./ios/expolocalbuildscicd.xcworkspace", 
       scheme: "expolocalbuildscicd",
-      sdk: "iphonesimulator",
-      configuration: "Debug",
-      codesigning_identity: "",
-      skip_codesigning: true
+      configuration: "Release",
+      skip_package_ipa: true,
+      build_path: "./output/filePath",
+      output_directory: "./output/filePath",
+      destination: "generic/platform=iOS Simulator"
     )
+    FileUtils.cp_r("../output/filePath/Build/Products/Release-iphonesimulator/expolocalbuildscicd.app", "../output")
   end
 end
 
