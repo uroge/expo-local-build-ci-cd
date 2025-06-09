@@ -46,8 +46,8 @@ jobs:
 
       - name: Build iOS .app (Simulator)
         run: |
-          xcodebuild -workspace ios/expolocalbuildcicd.xcworkspace \
-            -scheme expolocalbuildcicd \
+          xcodebuild -workspace ios/expolocalbuildscicd.xcworkspace \
+            -scheme expolocalbuildscicd \
             -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath ios/build
