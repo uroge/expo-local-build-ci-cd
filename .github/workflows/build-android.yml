@@ -29,7 +29,9 @@ jobs:
         run: npx expo prebuild --platform android --no-install
 
       - name: Install Fastlane
-        run: gem install fastlane --no-document
+        run: |
+          gem install fastlane --no-document --user-install
+          echo "$(ruby -r rubygems -e 'puts Gem.user_dir')/bin" >> $GITHUB_PATH
 
       - name: Build Android debug APK with Fastlane
         run: fastlane android build_debug
