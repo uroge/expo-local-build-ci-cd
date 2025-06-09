@@ -8,7 +8,6 @@ platform :ios do
       scheme: "expolocalbuildscicd",
       sdk: "iphonesimulator",
       configuration: "Debug",
-      export_method: "development",
       codesigning_identity: "",
       skip_codesigning: true
     )
