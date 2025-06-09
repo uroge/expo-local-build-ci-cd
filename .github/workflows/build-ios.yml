@@ -52,9 +52,20 @@ jobs:
         run: sudo gem install fastlane -NV
 
       - name: Build iOS .app with Fastlane (Simulator)
+        # Continue on error so the next step can run
+        continue-on-error: true
+        id: fastlane_build
         run: fastlane ios build_simulator
 
+      - name: Show detailed Xcode build log on error
+        # Only run this step if the fastlane build failed
+        if: steps.fastlane_build.outcome == 'failure'
+        run: |
+          echo "Fastlane build failed. Displaying detailed log:"
+          cat /Users/runner/Library/Logs/gym/expolocalbuildscicd-expolocalbuildscicd.log
+
       - name: Upload iOS .app as artifact
+        # This step will likely be skipped if the build fails, which is correct
         uses: actions/upload-artifact@v4
         with:
           name: app-ios-debug
