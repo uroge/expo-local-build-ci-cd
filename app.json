@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-local-builds-ci-cd",
-    "slug": "expo-local-builds-ci-cd",
+    "name": "expolocalbuildscicd",
+    "slug": "expolocalbuildscicd",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

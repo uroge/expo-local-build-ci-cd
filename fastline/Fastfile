@@ -1,0 +1,25 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build iOS app for Simulator"
+  lane :build_simulator do
+    build_app(
+      workspace: "ios/expolocalbuildscicd.xcworkspace",
+      scheme: "expolocalbuildscicd",
+      sdk: "iphonesimulator",
+      configuration: "Debug",
+      derived_data_path: "ios/build"
+    )
+  end
+end
+
+platform :android do
+  desc "Build Android debug APK"
+  lane :build_debug do
+    gradle(
+      task: "assembleDebug",
+      project_dir: "android",
+      print_command: false
+    )
+  end
+end

@@ -1,4 +1,4 @@
-name: Expo local builds CI IOS
+name: Expo local builds CI iOS
 
 on:
   push:
@@ -8,56 +8,54 @@ on:
 
 jobs:
   build-ios:
-    name: iOS Build (.app for simulator)
-    runs-on: macos-14 # Ensures Xcode 15.3
+    name: iOS Build (Simulator .app)
+    runs-on: macos-14 # Use macOS 14 explicitly (contains Xcode 15.3)
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache iOS build output
-        id: cache-ios
-        uses: actions/cache@v3
-        with:
-          path: ios/build/Build/Products/Release-iphonesimulator
-          key: ios-build-${{ github.ref }}-${{ github.sha }}
+      - name: Select Xcode 15.3
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.3.app
+          xcodebuild -version
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.18.1
+          node-version: 20
 
       - name: Install dependencies
-        run: yarn install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --frozen-lockfile
 
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
+      - name: Install new Expo CLI globally
+        run: npm install -g expo
 
-      - name: Expo prebuild (iOS)
-        run: npx expo prebuild --platform ios --non-interactive
-
-      - name: Update CocoaPods
+      - name: Verify Expo and Config Plugins versions
         run: |
-          sudo gem install cocoapods
+          expo --version
+          npm list @expo/config-plugins
+
+      - name: Prebuild native iOS project
+        run: |
+          rm -rf ios
+          npx expo prebuild --platform ios --no-install
+
+      - name: Install CocoaPods
+        run: |
           cd ios
           pod install
-        working-directory: ./ios
+          cd ..
 
-      - name: Build iOS app for simulator
-        run: |
-          cd ios
-          xcodebuild \
-            -workspace expo-local-build-ci-cd.xcworkspace \
-            -scheme expo-local-build-ci-cd \
-            -configuration Release \
-            -sdk iphonesimulator \
-            -derivedDataPath build \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_ENTITLEMENTS="" \
-            CODE_SIGNING_ALLOWED=NO
+      - name: Install Fastlane
+        run: sudo gem install fastlane -NV
 
-      - name: Upload .app artifact
+      - name: Build iOS .app with Fastlane (Simulator)
+        run: fastlane ios build_simulator
+
+      - name: Upload iOS .app as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ExpoApp.app
-          path: ios/build/Build/Products/Release-iphonesimulator/*.app
+          name: app-ios-debug
+          path: ios/build/Build/Products/Debug-iphonesimulator/*.app

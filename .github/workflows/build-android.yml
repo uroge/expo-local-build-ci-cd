@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-android:
-    name: Android Build (APK)
+    name: Android Build (Debug APK)
     runs-on: ubuntu-latest
 
     steps:
@@ -25,15 +25,17 @@ jobs:
       - name: Install Expo CLI globally
         run: npm install -g expo-cli
 
-      - name: Prebuild and build Android APK
-        run: |
-          export CI=1
-          npx expo prebuild --platform android
-          cd android
-          ./gradlew assembleRelease
+      - name: Prebuild native Android project
+        run: npx expo prebuild --platform android --no-install
 
-      - name: Upload APK artifact
+      - name: Install Fastlane
+        run: gem install fastlane --no-document
+
+      - name: Build Android debug APK with Fastlane
+        run: fastlane android build_debug
+
+      - name: Upload Debug APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release.apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
