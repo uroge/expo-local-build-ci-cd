@@ -28,7 +28,9 @@ jobs:
         run: yarn add -D expo-cli
 
       - name: Prebuild native iOS project
-        run: npx expo prebuild --platform ios --no-install
+        run: |
+          rm -rf ios
+          npx expo prebuild --platform ios --no-install
       - name: Install CocoaPods
         run: |
           cd ios
