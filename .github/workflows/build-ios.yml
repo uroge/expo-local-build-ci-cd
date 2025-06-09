@@ -24,28 +24,26 @@ jobs:
         with:
           install-command: yarn install --frozen-lockfile
 
-      - name: Install Expo CLI
-        run: yarn add -D expo-cli
+      # Instead of installing legacy expo-cli, install new Expo CLI globally
+      - name: Install new Expo CLI globally
+        run: npm install -g expo
+
+      - name: Verify Expo and Config Plugins versions
+        run: |
+          expo --version
+          npm list @expo/config-plugins
 
       - name: Prebuild native iOS project
         run: |
           rm -rf ios
           npx expo prebuild --platform ios --no-install
+
       - name: Install CocoaPods
         run: |
           cd ios
           pod install
           cd ..
 
-      # - name: Build iOS .app (Simulator)
-      #   run: |
-      #     cd ios
-      #     xcodebuild \
-      #       -workspace expo-local-build-ci-cd.xcworkspace \
-      #       -scheme expo-local-build-ci-cd \
-      #       -configuration Debug \
-      #       -sdk iphonesimulator \
-      #       -derivedDataPath build
       - name: Build iOS .app (Simulator)
         run: |
           xcodebuild -workspace ios/expolocalbuildcicd.xcworkspace \
